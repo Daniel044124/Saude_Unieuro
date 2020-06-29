@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Profile;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::resources([
+    'profiles' => 'ProfilesController',
+    'items' => 'ItemsController',
+    'menus' => 'MenusController',
+    'users' => 'UsersController',
+    'orders' => 'OrdersController'
+]);

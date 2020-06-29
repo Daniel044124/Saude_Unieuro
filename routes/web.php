@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'LoginController@index');
-Route::get('/profiles', 'ProfilesController@index');
+

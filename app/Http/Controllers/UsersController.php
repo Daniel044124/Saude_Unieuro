@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\User;
 use App\Profile;
 
-class ProfilesController extends Controller
+class UsersController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +16,7 @@ class ProfilesController extends Controller
      */
     public function index()
     {
-        return Profile::all();
+        return User::all();
     }
 
     /**
@@ -36,7 +38,9 @@ class ProfilesController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
+            'username' => ['required'],
+            'password' => ['required'],
+            'profiles_id' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -45,10 +49,14 @@ class ProfilesController extends Controller
                 'errors' => $validator->getMessageBag()->toArray(),
             ], 400);
         }
-        $profile = new Profile;
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 201);
+
+        $user = new User;
+        $user->username = $request->input('username');
+        $user->password = $request->input('password');
+
+        $profile = Profile::find($request->input('profiles_id'));
+        $profile->users()->save($user);
+        return response()->json($user, 201);
     }
 
     /**
@@ -59,8 +67,19 @@ class ProfilesController extends Controller
      */
     public function show($id)
     {
-        $profile = Profile::findOrFail($id);
-        return $profile;
+        $user = User::findOrFail($id);
+        return response()->json($user, 200);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        return response()->json(null, 404);
     }
 
     /**
@@ -73,7 +92,9 @@ class ProfilesController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
+            'username' => ['required'],
+            'password' => ['required'],
+            'profiles_id' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -82,10 +103,13 @@ class ProfilesController extends Controller
                 'errors' => $validator->getMessageBag()->toArray(),
             ], 400);
         }
-        $profile = Profile::find($id);
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 200);
+
+        $user = User::find($id);
+        $user->username = $request->input('username');
+        $user->password = $request->input('password');
+        $profile = Profile::find($request->input('profiles_id'));
+        $profile->users()->save($user);
+        return response()->json($user, 200);
     }
 
     /**
@@ -96,8 +120,9 @@ class ProfilesController extends Controller
      */
     public function destroy($id)
     {
-        $profile = Profile::find($id);
-        $profile->delete();
+        $user = User::find($id);
+        $user->delete();
         return response()->json(null, 204);
     }
+
 }

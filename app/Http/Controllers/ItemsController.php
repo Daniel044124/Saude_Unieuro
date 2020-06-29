@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Profile;
+use Illuminate\Support\Facades\Validator;
+use App\Item;
 
-class ProfilesController extends Controller
+class ItemsController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +16,7 @@ class ProfilesController extends Controller
      */
     public function index()
     {
-        return Profile::all();
+        return Item::all();
     }
 
     /**
@@ -37,18 +39,23 @@ class ProfilesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
+            'qtd' => ['required'],
+            'unity' => ['required']
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray(),
+                'errors' => $validator->getMessageBag()->toArray()
             ], 400);
         }
-        $profile = new Profile;
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 201);
+
+        $item = new Item;
+        $item->name = $request->input('name');
+        $item->qtd = $request->input('qtd');
+        $item->unity = $request->input('unity');
+        $item->save();
+        return response()->json($item, 201);
     }
 
     /**
@@ -59,8 +66,19 @@ class ProfilesController extends Controller
      */
     public function show($id)
     {
-        $profile = Profile::findOrFail($id);
-        return $profile;
+        $item = Item::findOrFail($id);
+        return $item;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        return response()->json(null, 404);
     }
 
     /**
@@ -74,18 +92,23 @@ class ProfilesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
+            'qtd' => ['required'],
+            'unity' => ['required']
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray(),
+                'errors' => $validator->getMessageBag()->toArray()
             ], 400);
         }
-        $profile = Profile::find($id);
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 200);
+
+        $item = Item::find($id);
+        $item->name = $request->input('name');
+        $item->qtd = $request->input('qtd');
+        $item->unity = $request->input('unity');
+        $item->save();
+        return response()->json($item, 200);
     }
 
     /**
@@ -96,8 +119,9 @@ class ProfilesController extends Controller
      */
     public function destroy($id)
     {
-        $profile = Profile::find($id);
-        $profile->delete();
+        $item = Item::find($id);
+        $item->delete();
         return response()->json(null, 204);
     }
+
 }
