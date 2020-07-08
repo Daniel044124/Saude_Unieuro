@@ -15,7 +15,7 @@ class MenusController extends Controller
      */
     public function index()
     {
-        return Menu::all();
+        return Menu::orderBy('name')->get();
     }
 
     /**
