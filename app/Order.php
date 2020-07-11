@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['users_id', 'status'];
+    protected $fillable = ['users_id', 'status', 'due_date', 'status'];
 
     public function user()
     {

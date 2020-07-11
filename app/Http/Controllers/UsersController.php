@@ -39,6 +39,7 @@ class UsersController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => ['required'],
+            'email' => ['required'],
             'password' => ['required'],
             'profiles_id' => ['required'],
         ]);
@@ -53,6 +54,7 @@ class UsersController extends Controller
         $user = new User;
         $user->username = $request->input('username');
         $user->password = $request->input('password');
+        $user->email = $request->input('email');
 
         $profile = Profile::find($request->input('profiles_id'));
         $profile->users()->save($user);
@@ -93,6 +95,7 @@ class UsersController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'username' => ['required'],
+            'email' => ['required'],
             'password' => ['required'],
             'profiles_id' => ['required'],
         ]);
@@ -106,6 +109,7 @@ class UsersController extends Controller
 
         $user = User::find($id);
         $user->username = $request->input('username');
+        $user->email = $request->input('email');
         $user->password = $request->input('password');
         $profile = Profile::find($request->input('profiles_id'));
         $profile->users()->save($user);
