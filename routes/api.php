@@ -19,8 +19,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/items/all', 'ItemsController@getAll');
+
 Route::resources([
-    'profiles' => 'ProfilesController',
+    'roles' => 'RolesController',
     'items' => 'ItemsController',
     'menus' => 'MenusController',
     'users' => 'UsersController',

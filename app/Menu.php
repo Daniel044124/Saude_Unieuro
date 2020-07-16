@@ -11,6 +11,6 @@ class Menu extends Model
 
     public function profiles()
     {
-        return $this->belongsToMany('App\Profile', 'menus_profiles', 'menus_id', 'profiles_id');
+        return $this->belongsToMany('App\Role');
     }
 }

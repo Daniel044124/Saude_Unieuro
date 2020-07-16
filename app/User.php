@@ -11,11 +11,11 @@ class User extends Model
 
     public function profile()
     {
-        return $this->belongsTo('App\Profile', 'profiles_id');
+        return $this->belongsTo('App\Role');
     }
 
     public function orders()
     {
-        return $this->hasMany('App\Order', 'users_id');
+        return $this->hasMany('App\Order');
     }
 }

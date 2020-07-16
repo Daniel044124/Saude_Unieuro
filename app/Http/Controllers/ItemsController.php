@@ -19,6 +19,18 @@ class ItemsController extends Controller
         return Item::paginate(15);
     }
 
+    public function getAll()
+    {
+        try {
+            return Item::all();
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *

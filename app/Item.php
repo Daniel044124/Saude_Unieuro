@@ -8,12 +8,17 @@ class Item extends Model
 {
 
     public $timestamps = false;
-    protected $fillable = ['name', 'qtd', 'unity'];
+    protected $fillable = ['name', 'brand', 'unit'];
 
     public function orders()
     {
-        return $this->belongsToMany('App\Order', 'orders_items', 'items_id', 'orders_id')
+        return $this->belongsToMany('App\Order')
             ->withPivot('qtd');
+    }
+
+    public function lots()
+    {
+        return $this->hasMany('App\Lot');
     }
 
 }

@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['users_id', 'status', 'due_date', 'status'];
+    protected $fillable = ['user_id', 'status', 'due_date', 'status'];
 
     public function user()
     {
-        return $this->belongsTo('App\User', 'users_id');
+        return $this->belongsTo('App\User');
     }
 
     public function items()
     {
-        return $this->belongsToMany('App\Item', 'orders_items', 'orders_id', 'items_id')
+        return $this->belongsToMany('App\Item')
             ->withPivot('qtd');
     }
 }

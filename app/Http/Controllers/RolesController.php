@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Profile;
+use App\Role;
 
-class ProfilesController extends Controller
+class RolesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,7 @@ class ProfilesController extends Controller
      */
     public function index()
     {
-        return Profile::all();
+        return Role::all();
     }
 
     /**
@@ -36,7 +36,7 @@ class ProfilesController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
+            'description' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -45,10 +45,10 @@ class ProfilesController extends Controller
                 'errors' => $validator->getMessageBag()->toArray(),
             ], 400);
         }
-        $profile = new Profile;
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 201);
+        $role = new Role;
+        $role->description = $request->input('description');
+        $role->save();
+        return response()->json($role, 201);
     }
 
     /**
@@ -59,8 +59,8 @@ class ProfilesController extends Controller
      */
     public function show($id)
     {
-        $profile = Profile::findOrFail($id);
-        return $profile;
+        $role = Role::findOrFail($id);
+        return $role;
     }
 
     /**
@@ -73,7 +73,7 @@ class ProfilesController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
+            'description' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -82,10 +82,10 @@ class ProfilesController extends Controller
                 'errors' => $validator->getMessageBag()->toArray(),
             ], 400);
         }
-        $profile = Profile::find($id);
-        $profile->name = $request->input('name');
-        $profile->save();
-        return response()->json($profile, 200);
+        $role = Role::find($id);
+        $role->description = $request->input('description');
+        $role->save();
+        return response()->json($role, 200);
     }
 
     /**
@@ -96,8 +96,8 @@ class ProfilesController extends Controller
      */
     public function destroy($id)
     {
-        $profile = Profile::find($id);
-        $profile->delete();
+        $role = Role::find($id);
+        $role->delete();
         return response()->json(null, 204);
     }
 }
