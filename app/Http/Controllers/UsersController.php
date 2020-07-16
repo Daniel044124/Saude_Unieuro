@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\User;
-use App\Profile;
+use App\Role;
 
 class UsersController extends Controller
 {
@@ -41,7 +41,7 @@ class UsersController extends Controller
             'username' => ['required'],
             'email' => ['required'],
             'password' => ['required'],
-            'profiles_id' => ['required'],
+            'role_id' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -56,8 +56,8 @@ class UsersController extends Controller
         $user->password = $request->input('password');
         $user->email = $request->input('email');
 
-        $profile = Profile::find($request->input('profiles_id'));
-        $profile->users()->save($user);
+        $role = Role::find($request->input('role_id'));
+        $role->users()->save($user);
         return response()->json($user, 201);
     }
 
@@ -97,7 +97,7 @@ class UsersController extends Controller
             'username' => ['required'],
             'email' => ['required'],
             'password' => ['required'],
-            'profiles_id' => ['required'],
+            'role_id' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -111,8 +111,8 @@ class UsersController extends Controller
         $user->username = $request->input('username');
         $user->email = $request->input('email');
         $user->password = $request->input('password');
-        $profile = Profile::find($request->input('profiles_id'));
-        $profile->users()->save($user);
+        $role = Role::find($request->input('role_id'));
+        $role->users()->save($user);
         return response()->json($user, 200);
     }
 
