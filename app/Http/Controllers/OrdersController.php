@@ -14,7 +14,7 @@ class OrdersController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
@@ -24,7 +24,7 @@ class OrdersController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
@@ -34,55 +34,64 @@ class OrdersController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => ['required'],
-            'items' => ['required'],
-            'items.*.id' => ['required'],
-            'items.*.qtd' => ['required'],
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'user_id' => ['required'],
+                'due_date' => ['required'],
+                'items' => ['required'],
+                'items.*.id' => ['required'],
+                'items.*.qtd' => ['required'],
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->getMessageBag()->toArray(),
+                ], 400);
+            }
+
+            $order = new Order;
+            $order->due_date = $request->input('due_date');
+            $user = User::find($request->input('user_id'));
+
+            $user->orders()->save($order);
+
+            $items = $request->input('items.*.id');
+            $itemsQtd = $request->input('items.*.qtd');
+
+            if (count($items) !== count($itemsQtd)) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['É necessário definir quantidades para todos os itens selecionados.'],
+                ], 400);
+            }
+
+            /**
+             * Para cada item da lista, adicionar a relação da tabela 'pivot',
+             * junto com a quantidade solicitada.
+             */
+            for ($i = 0; $i < count($items); $i++) {
+                $order->items()->attach($items[$i], ['qtd' => $itemsQtd[$i]]);
+            }
+            return response()->json($order, 201);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray(),
-            ], 400);
+                'errors' => $e->getMessage()
+            ]);
         }
-
-        $order = new Order;
-        $user = User::find($request->input('user_id'));
-
-        $user->orders()->save($order);
-
-        $items = $request->input('items.*.id');
-        $itemsQtd = $request->input('items.*.qtd');
-
-        if (count($items) !== count($itemsQtd)) {
-            return response()->json([
-                'success' => false,
-                'errors' => ['É necessário definir quantidades para todos os itens.'],
-            ], 400);
-        }
-
-        /**
-         * Para cada item da lista, adicionar a relação da tabela 'pivot',
-         * junto com a quantidade solicitada.
-         */
-        for ($i = 0; $i < count($items); $i++) {
-            $order->items()->attach($items[$i], ['qtd' => $itemsQtd[$i]]);
-        }
-        return response()->json($order, 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -93,8 +102,8 @@ class OrdersController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
@@ -104,9 +113,9 @@ class OrdersController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -151,8 +160,8 @@ class OrdersController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Item;
+use App\Lot;
 
 class ItemsController extends Controller
 {
@@ -12,17 +13,21 @@ class ItemsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        return Item::paginate(15);
+        return Item::with(['lots' => function ($query) {
+            $query->where('qtd', '>', 0);
+        }])->paginate(15);
     }
 
     public function getAll()
     {
         try {
-            return Item::all();
+            return Item::with(['lots' => function ($query) {
+                $query->where('qtd', '>', 0);
+            }])->get();
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -44,15 +49,15 @@ class ItemsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
-            'qtd' => ['required'],
-            'unity' => ['required']
+            'lot.qtd' => ['required'],
+            'unit' => ['required']
         ]);
 
         if ($validator->fails()) {
@@ -64,16 +69,23 @@ class ItemsController extends Controller
 
         $item = new Item;
         $item->name = $request->input('name');
-        $item->qtd = $request->input('qtd');
-        $item->unity = $request->input('unity');
+        $item->brand = $request->input('brand');
+        $item->unit = $request->input('unit');
+
+        $lot = new Lot;
+        $lot->description = $request->input('lot.description');
+        $lot->expiration = $request->input('lot.expiration');
+        $lot->qtd = $request->input('lot.qtd');
+
         $item->save();
+        $item->lots()->save($lot);
         return response()->json($item, 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -85,7 +97,7 @@ class ItemsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -96,8 +108,8 @@ class ItemsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -126,7 +138,7 @@ class ItemsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
