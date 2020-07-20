@@ -11,7 +11,7 @@ class Role extends Model
 
     public function menus()
     {
-        return $this->belongsToMany('App\Menu');
+        return $this->belongsToMany('App\Menu', 'menus_roles');
     }
 
     public function users()

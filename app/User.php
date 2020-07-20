@@ -2,14 +2,14 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Model
+class User extends Authenticatable
 {
     public $timestamps = false;
     protected $fillable = ['username', 'email', 'password', 'remember_token', 'profiles_id'];
 
-    public function profile()
+    public function role()
     {
         return $this->belongsTo('App\Role');
     }

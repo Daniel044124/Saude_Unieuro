@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Profile;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +17,9 @@ use App\Profile;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/login', 'LoginController@authenticate');
+Route::get('/logout', 'LoginController@logout');
 
 Route::get('/items/all', 'ItemsController@getAll');
 

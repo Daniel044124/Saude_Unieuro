@@ -9,8 +9,8 @@ class Menu extends Model
     public $timestamps = false;
     protected $fillable = ['name', 'path', 'icon'];
 
-    public function profiles()
+    public function roles()
     {
-        return $this->belongsToMany('App\Role');
+        return $this->belongsToMany('App\Role', 'menus_roles');
     }
 }
