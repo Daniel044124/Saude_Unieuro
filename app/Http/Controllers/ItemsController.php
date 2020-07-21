@@ -71,11 +71,15 @@ class ItemsController extends Controller
         $item->name = $request->input('name');
         $item->brand = $request->input('brand');
         $item->unit = $request->input('unit');
+        $item->formula = $request->input('formula');
+        $item->molecular_weight = $request->input('molecular_weight');
+        $item->concentration = $request->input('concentration');
 
         $lot = new Lot;
         $lot->description = $request->input('lot.description');
         $lot->expiration = $request->input('lot.expiration');
         $lot->qtd = $request->input('lot.qtd');
+        $lot->open = $request->input('lot.open');
 
         $item->save();
         $item->lots()->save($lot);
@@ -131,6 +135,9 @@ class ItemsController extends Controller
         $item->name = $request->input('name');
         $item->qtd = $request->input('qtd');
         $item->unity = $request->input('unity');
+        $item->formula = $request->input('formula');
+        $item->molecular_weight = $request->input('molecular_weight');
+        $item->concentration = $request->input('concentration');
         $item->save();
         return response()->json($item, 200);
     }
