@@ -14,19 +14,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::post('/login', 'LoginController@authenticate');
 Route::get('/logout', 'LoginController@logout');
 
-Route::get('/items/all', 'ItemsController@getAll');
 
-Route::resources([
-    'roles' => 'RolesController',
-    'items' => 'ItemsController',
-    'menus' => 'MenusController',
-    'users' => 'UsersController',
-    'orders' => 'OrdersController'
-]);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/items/all', 'ItemsController@getAll');
+    Route::get('/user/{id}/orders', 'UsersController@orders');
+    Route::apiResources([
+        'roles' => 'RolesController',
+        'items' => 'ItemsController',
+        'menus' => 'MenusController',
+        'users' => 'UsersController',
+        'orders' => 'OrdersController'
+    ]);
+});
+

@@ -12,11 +12,16 @@ class UsersController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     public function index()
     {
-        return User::all();
+        return User::select('id', 'username', 'email', 'role_id')->with('role')->get();
+    }
+
+    public function orders($id)
+    {
+        return User::find($id)->orders;
     }
 
     /**

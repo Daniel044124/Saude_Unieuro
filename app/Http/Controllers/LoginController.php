@@ -10,13 +10,16 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return response()->json(Auth::user(), 200);
+        try {
+            $credentials = $request->only('email', 'password');
+            if (Auth::attempt($credentials)) {
+                return response()->json(Auth::user(), 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Dados inválidos. ' . $e->getMessage()
+            ], 400);
         }
-        return response()->json([
-            'error' => 'Dados inválidos'
-        ], 400);
     }
 
     public function logout() {
