@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Lot extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['description', 'expiration', 'qtd', 'item_id'];
+    protected $fillable = ['description', 'expiration', 'qtd', 'item_id', 'open'];
 
     public function items()
     {

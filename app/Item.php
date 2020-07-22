@@ -8,7 +8,7 @@ class Item extends Model
 {
 
     public $timestamps = false;
-    protected $fillable = ['name', 'brand', 'unit'];
+    protected $fillable = ['name', 'brand', 'unit', 'formula', 'molecular_weight', 'concentration'];
 
     public function orders()
     {
