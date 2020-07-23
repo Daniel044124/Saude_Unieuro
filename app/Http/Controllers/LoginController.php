@@ -12,12 +12,16 @@ class LoginController extends Controller
     {
         try {
             $credentials = $request->only('email', 'password');
+
             if (Auth::attempt($credentials)) {
                 return response()->json(Auth::user(), 200);
             }
+            return response()->json([
+                'error' => 'Dados inválidos.'
+            ], 400);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Dados inválidos. ' . $e->getMessage()
+                'error' => 'Houve um erro em sua solicitação.'
             ], 400);
         }
     }
