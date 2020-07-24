@@ -26,19 +26,9 @@ class UsersController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return response()->json(null, 404);
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -70,8 +60,8 @@ class UsersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -80,29 +70,17 @@ class UsersController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        return response()->json(null, 404);
-    }
-
-    /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'username' => ['required'],
             'email' => ['required'],
-            'password' => ['required'],
             'role_id' => ['required'],
         ]);
 
@@ -116,17 +94,41 @@ class UsersController extends Controller
         $user = User::find($id);
         $user->username = $request->input('username');
         $user->email = $request->input('email');
-        $user->password = $request->input('password');
         $role = Role::find($request->input('role_id'));
         $role->users()->save($user);
         return response()->json($user, 200);
     }
 
     /**
+     * Redefine the user password
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function redefinePassword(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray(),
+            ], 400);
+        }
+
+        $user = User::find($id);
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+        return response()->json($user, 200);
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

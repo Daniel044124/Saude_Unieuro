@@ -22,6 +22,7 @@ Route::get('/logout', 'LoginController@logout');
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/items/all', 'ItemsController@getAll');
     Route::get('/user/{id}/orders', 'UsersController@orders');
+    Route::put('/users/{id}/redefine', 'UsersController@redefinePassword');
     Route::apiResources([
         'roles' => 'RolesController',
         'items' => 'ItemsController',
