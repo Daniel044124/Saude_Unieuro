@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Item;
 use App\Order;
 use App\User;
+use App\Lot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -14,11 +15,33 @@ class OrdersController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Order::with('items')->get();
+        $filter = $request->query('filter');
+        switch ($filter) {
+            case 'pending':
+                return Order::where('dispatched', false)->with('items')->get();
+                break;
+            case 'dispatched':
+                return Order::where('dispatched', true)->with('items')->get();
+                break;
+            default:
+                return Order::with('items')->get();
+        }
+    }
+
+    /**
+     * Return the order by id and the items and lots related.
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function getOrdersItemsLots($id)
+    {
+        return Order::with('items.lots')->find($id);
     }
 
     /**
@@ -154,6 +177,40 @@ class OrdersController extends Controller
                 'success' => false,
                 'errors' => [$e->getMessage()],
             ], 400);
+        }
+    }
+
+    /**
+     * Set the 'dispatched' table field to true and subtract the lots quantities.
+     *
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dispatchOrder(Request $request, $id)
+    {
+        try {
+            $order = Order::find($id);
+            if ($order->dispatched) {
+                throw new \Exception('O pedido já foi liberado.');
+            }
+            DB::beginTransaction();
+            $order->dispatched = true;
+            $lotsInformation = $request->input('lotsInformation');
+            foreach ($lotsInformation as $lotInformation) {
+                $lot = Lot::find($lotInformation['id']);
+                if ($lot->qtd < $lotInformation['qtySubtracted']) {
+                    throw new \Exception('A quantidade selecionada é maior do que a disponível.');
+                }
+                $lot->qtd -= $lotInformation['qtySubtracted'];
+                $lot->save();
+            }
+            $order->save();
+            DB::commit();
+            return response()->json($order, 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
         }
     }
 

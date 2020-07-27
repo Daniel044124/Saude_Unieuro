@@ -56,6 +56,9 @@ class ItemsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
+            'brand' => ['required'],
+            'lot.description' => ['required'],
+            'lot.expiration' => ['required'],
             'lot.qtd' => ['required'],
             'unit' => ['required']
         ]);
