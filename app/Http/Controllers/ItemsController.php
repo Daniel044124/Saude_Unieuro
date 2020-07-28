@@ -107,7 +107,8 @@ class ItemsController extends Controller
      * @param $id
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
      */
-    public function getItemLots($id) {
+    public function getItemLots($id)
+    {
         return Item::with('lots')->find($id);
     }
 
@@ -131,28 +132,30 @@ class ItemsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required'],
-            'qtd' => ['required'],
-            'unity' => ['required']
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => ['required'],
+                'unit' => ['required']
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
-            ], 400);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->getMessageBag()->toArray()
+                ], 400);
+            }
+
+            $item = Item::find($id);
+            $item->name = $request->input('name');
+            $item->unit = $request->input('unit');
+            $item->formula = $request->input('formula');
+            $item->molecular_weight = $request->input('molecular_weight');
+            $item->concentration = $request->input('concentration');
+            $item->save();
+            return response()->json($item, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $item = Item::find($id);
-        $item->name = $request->input('name');
-        $item->qtd = $request->input('qtd');
-        $item->unity = $request->input('unity');
-        $item->formula = $request->input('formula');
-        $item->molecular_weight = $request->input('molecular_weight');
-        $item->concentration = $request->input('concentration');
-        $item->save();
-        return response()->json($item, 200);
     }
 
     /**
