@@ -19,6 +19,7 @@ Route::get('/logout', 'LoginController@logout');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/items/all', 'ItemsController@getAll');
+    Route::get('/lots/item/{id}', 'LotsController@getByItems');
     Route::get('/user/{id}/orders', 'UsersController@orders');
     Route::put('/users/{id}/redefine', 'UsersController@redefinePassword');
     Route::put('/orders/dispatch/{id}', 'OrdersController@dispatchOrder');
@@ -28,7 +29,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'items' => 'ItemsController',
         'menus' => 'MenusController',
         'users' => 'UsersController',
-        'orders' => 'OrdersController'
+        'orders' => 'OrdersController',
+        'lots' => 'LotsController'
     ]);
 });
 

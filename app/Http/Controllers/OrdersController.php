@@ -41,7 +41,9 @@ class OrdersController extends Controller
      */
     public function getOrdersItemsLots($id)
     {
-        return Order::with('items.lots')->find($id);
+        return Order::with(['items.lots' => function ($query) {
+            $query->where('qtd', '>', 0);
+        }])->find($id);
     }
 
     /**

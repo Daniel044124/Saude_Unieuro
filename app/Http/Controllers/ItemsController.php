@@ -13,7 +13,7 @@ class ItemsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function index()
     {
@@ -102,6 +102,16 @@ class ItemsController extends Controller
     }
 
     /**
+     * Display the item and the lots related.
+     *
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     */
+    public function getItemLots($id) {
+        return Item::with('lots')->find($id);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param int $id
@@ -117,7 +127,7 @@ class ItemsController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -149,7 +159,7 @@ class ItemsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
