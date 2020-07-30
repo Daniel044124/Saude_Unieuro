@@ -19,6 +19,27 @@ class RolesController extends Controller
         return Role::all();
     }
 
+    public function getMenusByRole($id)
+    {
+        try {
+            return Role::with('menus')->find($id);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage(), 400]);
+        }
+    }
+
+    public function setMenusByRole(Request $request, $id)
+    {
+        try {
+            $menus = $request->input('menus');
+            $role = Role::find($id);
+            $role->menus()->sync($menus);
+            return response()->json($role, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *

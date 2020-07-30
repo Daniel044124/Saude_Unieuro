@@ -58,7 +58,7 @@ class ItemsController extends Controller
             'name' => ['required'],
             'brand' => ['required'],
             'lot.description' => ['required'],
-            'lot.expiration' => ['required'],
+            'lot.expiration' => ['nullable', 'after_or_equal:today'],
             'lot.qtd' => ['required'],
             'unit' => ['required']
         ]);

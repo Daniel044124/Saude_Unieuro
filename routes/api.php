@@ -24,6 +24,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/users/{id}/redefine', 'UsersController@redefinePassword');
     Route::put('/orders/dispatch/{id}', 'OrdersController@dispatchOrder');
     Route::get('/orders/{id}/items/lots', 'OrdersController@getOrdersItemsLots');
+    Route::get('/roles/{id}/menus', 'RolesController@getMenusByRole');
+    Route::put('/roles/{id}/menus', 'RolesController@setMenusByRole');
     Route::apiResources([
         'roles' => 'RolesController',
         'items' => 'ItemsController',
