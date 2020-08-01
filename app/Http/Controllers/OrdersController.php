@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Course;
 use App\Item;
+use App\Lab;
 use App\Order;
 use App\User;
 use App\Lot;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -22,12 +25,9 @@ class OrdersController extends Controller
     {
         $filter = $request->query('filter');
         switch ($filter) {
-            case 'pending':
-                return Order::where('dispatched', false)->with('items')->get();
-                break;
             case 'dispatched':
-                return Order::where('dispatched', true)->with('items')->get();
-                break;
+            case 'created':
+                return Order::where('dispatched', $filter)->with('items')->get();
             default:
                 return Order::with('items')->get();
         }
@@ -47,16 +47,6 @@ class OrdersController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function create()
-    {
-        return response()->json(null, 404);
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
@@ -68,9 +58,12 @@ class OrdersController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => ['required'],
                 'due_date' => ['required'],
+                'due_time' => ['required'],
                 'items' => ['required'],
                 'items.*.id' => ['required'],
                 'items.*.qtd' => ['required'],
+                'lab_id' => ['required'],
+                'course_id' => ['required']
             ]);
 
             if ($validator->fails()) {
@@ -80,8 +73,26 @@ class OrdersController extends Controller
                 ], 400);
             }
 
+            $checkAvailability = Order::where([
+                ['lab_id', $request->input('lab_id')],
+                ['due_date', new DateTime($request->input('due_date'))],
+                ['due_time', $request->input('due_time')]
+            ]);
+
+            if ($checkAvailability->count() > 0) {
+                return response()->json(['error' => 'Laboratório não disponível nesta data e horário.'], 400);
+            }
+
             $order = new Order;
             $order->due_date = $request->input('due_date');
+            $order->due_time = $request->input('due_time');
+
+            $course = Course::find($request->input('course_id'));
+            $lab = Lab::find($request->input('lab_id'));
+
+            $order->course()->associate($course);
+            $order->lab()->associate($lab);
+
             $user = User::find($request->input('user_id'));
 
             $user->orders()->save($order);
@@ -108,7 +119,7 @@ class OrdersController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $e->getMessage()
-            ]);
+            ], 400);
         }
     }
 
@@ -120,19 +131,8 @@ class OrdersController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with('items')->find($id);
+        $order = Order::with(['items', 'lab', 'course', 'user'])->find($id);
         return response()->json($order, 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function edit($id)
-    {
-        return response()->json(null, 404);
     }
 
     /**
@@ -165,14 +165,9 @@ class OrdersController extends Controller
         }
 
         try {
-            DB::beginTransaction();
             $order = Order::findOrFail($id);
-            $order->items()->detach();
-            $order->items()->attach($itemsFormatted);
-            $order->save();
-            DB::commit();
-            $order->items;
-            return response()->json($order, 200);
+            $order->items()->sync($itemsFormatted);
+            return response()->json($order->with(['items', 'courses', 'labs']), 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

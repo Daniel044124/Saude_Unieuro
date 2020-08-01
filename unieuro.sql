@@ -16,9 +16,56 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: order_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.order_status AS ENUM (
+    'created',
+    'processing',
+    'dispatched'
+);
+
+
+ALTER TYPE public.order_status OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: courses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.courses (
+    id integer NOT NULL,
+    description character varying NOT NULL
+);
+
+
+ALTER TABLE public.courses OWNER TO postgres;
+
+--
+-- Name: courses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.courses_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.courses_id_seq OWNER TO postgres;
+
+--
+-- Name: courses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.courses_id_seq OWNED BY public.courses.id;
+
 
 --
 -- Name: items; Type: TABLE; Schema: public; Owner: postgres
@@ -71,6 +118,41 @@ CREATE TABLE public.items_orders (
 
 
 ALTER TABLE public.items_orders OWNER TO postgres;
+
+--
+-- Name: labs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.labs (
+    id integer NOT NULL,
+    description character varying NOT NULL,
+    comment character varying
+);
+
+
+ALTER TABLE public.labs OWNER TO postgres;
+
+--
+-- Name: labs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.labs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.labs_id_seq OWNER TO postgres;
+
+--
+-- Name: labs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.labs_id_seq OWNED BY public.labs.id;
+
 
 --
 -- Name: lots; Type: TABLE; Schema: public; Owner: postgres
@@ -166,9 +248,12 @@ CREATE TABLE public.orders (
     id integer NOT NULL,
     user_id integer NOT NULL,
     created_at timestamp without time zone DEFAULT now(),
-    due_date timestamp without time zone NOT NULL,
+    due_date date NOT NULL,
     status boolean DEFAULT true,
-    dispatched boolean DEFAULT false
+    lab_id integer,
+    course_id integer,
+    dispatched public.order_status DEFAULT 'created'::public.order_status,
+    due_time time without time zone NOT NULL
 );
 
 
@@ -268,10 +353,24 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: courses id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.courses ALTER COLUMN id SET DEFAULT nextval('public.courses_id_seq'::regclass);
+
+
+--
 -- Name: items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items ALTER COLUMN id SET DEFAULT nextval('public.items_id_seq'::regclass);
+
+
+--
+-- Name: labs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.labs ALTER COLUMN id SET DEFAULT nextval('public.labs_id_seq'::regclass);
 
 
 --
@@ -310,6 +409,15 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
+-- Data for Name: courses; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.courses (id, description) FROM stdin;
+3	Odontologia
+\.
+
+
+--
 -- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -318,8 +426,6 @@ COPY public.items (id, name, brand, unit, formula, molecular_weight, concentrati
 3	Equipo Macrogotas	Labor Import	UN	\N	\N	\N
 1	Luva	Latex	UN	\N	\N	\N
 4	Luva 2	Latex 2	UN	\N	\N	\N
-5	Luva 2	Latex 2	UN	\N	\N	\N
-6	Luva 2	Latex 2	UN	\N	\N	\N
 7	Açúcar	Cristal	KG	\N	\N	\N
 \.
 
@@ -329,44 +435,21 @@ COPY public.items (id, name, brand, unit, formula, molecular_weight, concentrati
 --
 
 COPY public.items_orders (order_id, item_id, qtd) FROM stdin;
-5	1	2
-6	1	12
-6	2	46
-6	3	85
-7	1	12
-7	2	64
-8	1	1
-9	1	1
-10	1	1
-11	1	2
-12	1	1
-13	1	12
-14	1	12
-15	1	12
-16	1	2
-17	1	2
-18	1	450
-18	2	6500
-18	3	54
-19	1	12
-20	3	100
-21	1	2
-22	2	12
-23	2	2
-23	3	3
-23	1	4
-24	2	15
-24	3	15
-24	1	15
-25	2	12
-25	3	12
-25	1	12
-26	2	12
-26	3	22
-26	1	23
-27	2	10
-28	2	20
-28	3	20
+30	2	12
+31	2	1
+32	2	1
+33	2	1
+34	2	1
+\.
+
+
+--
+-- Data for Name: labs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.labs (id, description, comment) FROM stdin;
+2	Laboratório 4	Bloco C
+1	Laboratório 10	Bloco F
 \.
 
 
@@ -399,6 +482,8 @@ COPY public.menus (id, name, path, icon) FROM stdin;
 6	Novo pedido	/orders/new	\N
 7	Acessos	/permissions	\N
 8	Meus pedidos	/users/myorders	\N
+9	Laboratórios	/labs	\N
+10	Cursos	/courses	\N
 \.
 
 
@@ -418,6 +503,8 @@ COPY public.menus_roles (role_id, menu_id) FROM stdin;
 4	6
 4	8
 2	1
+2	9
+2	10
 \.
 
 
@@ -425,31 +512,12 @@ COPY public.menus_roles (role_id, menu_id) FROM stdin;
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.orders (id, user_id, created_at, due_date, status, dispatched) FROM stdin;
-9	2	2020-07-19 17:19:54.64826	2020-07-23 20:19:00	t	f
-10	2	2020-07-19 17:26:10.100693	2020-07-21 20:26:00	t	f
-11	2	2020-07-19 17:28:35.51576	2020-07-22 20:28:00	t	f
-12	2	2020-07-19 17:34:37.749202	2020-07-24 20:34:00	t	f
-13	2	2020-07-19 20:01:56.227233	2020-07-23 23:01:00	t	f
-14	2	2020-07-19 20:23:29.615778	2020-07-22 23:23:00	t	f
-15	2	2020-07-19 21:03:56.963426	2020-07-25 00:03:00	t	f
-16	2	2020-07-20 17:00:00.754057	2020-07-24 19:59:00	t	f
-17	2	2020-07-20 18:37:17.81389	2020-12-31 21:37:00	t	f
-18	2	2020-07-20 22:51:43.54751	2020-07-23 01:51:00	t	f
-19	6	2020-07-26 03:38:00.199899	2020-07-29 06:37:00	t	f
-6	2	2020-07-19 16:19:32.25651	2020-07-30 19:19:00	t	t
-5	2	2020-07-19 16:16:28.751226	2020-07-23 19:06:00	t	t
-20	6	2020-07-27 00:04:55.864803	2020-07-27 03:04:00	t	t
-21	6	2020-07-28 02:23:04.643306	2020-07-31 05:22:00	t	t
-7	2	2020-07-19 17:15:05.023853	2020-07-21 20:14:00	t	t
-22	6	2020-07-28 03:10:42.3092	2020-08-21 06:10:00	t	f
-23	6	2020-07-28 20:43:48.393273	2020-07-30 23:43:00	t	f
-24	8	2020-07-30 01:02:39.109052	2020-08-21 04:02:00	t	f
-25	8	2020-07-30 01:03:32.7659	2020-08-21 04:03:00	t	f
-26	8	2020-07-30 02:39:04.744835	2020-07-31 05:38:00	t	f
-27	8	2020-07-30 17:41:31.482997	2020-07-31 20:41:00	t	f
-8	2	2020-07-19 17:16:04.287364	2020-09-24 20:15:00	t	t
-28	8	2020-07-30 19:31:07.827663	2020-08-20 22:30:00	t	f
+COPY public.orders (id, user_id, created_at, due_date, status, lab_id, course_id, dispatched, due_time) FROM stdin;
+30	8	2020-08-01 00:28:06.078239	2020-08-01	t	2	3	created	12:00:00
+31	8	2020-08-01 00:28:32.241507	2020-08-01	t	2	3	created	11:00:00
+32	8	2020-08-01 00:51:56.587347	2020-08-08	t	2	3	created	18:00:00
+33	8	2020-08-01 13:11:45.342058	2020-08-01	t	2	3	created	13:00:00
+34	8	2020-08-01 13:16:47.126101	2020-08-01	t	2	3	created	14:00:00
 \.
 
 
@@ -476,10 +544,24 @@ COPY public.users (id, username, email, password, role_id) FROM stdin;
 
 
 --
+-- Name: courses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.courses_id_seq', 3, true);
+
+
+--
 -- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.items_id_seq', 7, true);
+
+
+--
+-- Name: labs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.labs_id_seq', 3, true);
 
 
 --
@@ -493,14 +575,14 @@ SELECT pg_catalog.setval('public.lots_id_seq', 8, true);
 -- Name: menus_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.menus_id_seq', 8, true);
+SELECT pg_catalog.setval('public.menus_id_seq', 10, true);
 
 
 --
 -- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.orders_id_seq', 28, true);
+SELECT pg_catalog.setval('public.orders_id_seq', 34, true);
 
 
 --
@@ -518,11 +600,27 @@ SELECT pg_catalog.setval('public.users_id_seq', 8, true);
 
 
 --
+-- Name: courses courses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.courses
+    ADD CONSTRAINT courses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.items
     ADD CONSTRAINT items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: labs labs_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.labs
+    ADD CONSTRAINT labs_pk PRIMARY KEY (id);
 
 
 --
@@ -611,6 +709,22 @@ ALTER TABLE ONLY public.menus_roles
 
 ALTER TABLE ONLY public.menus_roles
     ADD CONSTRAINT menus_roles_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id);
+
+
+--
+-- Name: orders orders_course_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id);
+
+
+--
+-- Name: orders orders_lab_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.orders
+    ADD CONSTRAINT orders_lab_id_fkey FOREIGN KEY (lab_id) REFERENCES public.labs(id);
 
 
 --

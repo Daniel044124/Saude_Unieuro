@@ -32,7 +32,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'menus' => 'MenusController',
         'users' => 'UsersController',
         'orders' => 'OrdersController',
-        'lots' => 'LotsController'
+        'lots' => 'LotsController',
+        'labs' => 'LabsController',
+        'courses' => 'CoursesController'
     ]);
 });
 

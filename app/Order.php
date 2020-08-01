@@ -7,11 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['user_id', 'status', 'due_date', 'dispatched'];
+    protected $fillable = ['user_id', 'status', 'due_date', 'due_time', 'dispatched'];
 
-    public function users()
+    public function user()
     {
         return $this->belongsTo('App\User');
+    }
+
+    public function lab()
+    {
+        return $this->belongsTo('App\Lab');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo('App\Course');
     }
 
     public function items()
