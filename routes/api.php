@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/{id}/orders', 'UsersController@orders');
     Route::put('/users/{id}/redefine', 'UsersController@redefinePassword');
     Route::put('/orders/dispatch/{id}', 'OrdersController@dispatchOrder');
+    Route::put('/orders/processing/{order}', 'OrdersController@processingOrder');
     Route::get('/orders/{id}/items/lots', 'OrdersController@getOrdersItemsLots');
     Route::get('/roles/{id}/menus', 'RolesController@getMenusByRole');
     Route::put('/roles/{id}/menus', 'RolesController@setMenusByRole');

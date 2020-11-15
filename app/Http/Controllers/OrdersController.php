@@ -24,13 +24,10 @@ class OrdersController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter');
-        switch ($filter) {
-            case 'dispatched':
-            case 'created':
-                return Order::where('dispatched', $filter)->with('items')->get();
-            default:
-                return Order::with('items')->get();
+        if ($filter === 'all') {
+            return Order::with('items')->get();
         }
+        return Order::where('dispatched', $filter)->with('items')->get();
     }
 
     /**
@@ -188,11 +185,11 @@ class OrdersController extends Controller
     {
         try {
             $order = Order::find($id);
-            if ($order->dispatched) {
+            if ($order->dispatched === 'dispatched') {
                 throw new \Exception('O pedido já foi liberado.');
             }
             DB::beginTransaction();
-            $order->dispatched = true;
+            $order->dispatched = 'dispatched';
             $lotsInformation = $request->input('lotsInformation');
             foreach ($lotsInformation as $lotInformation) {
                 $lot = Lot::find($lotInformation['id']);
@@ -209,6 +206,20 @@ class OrdersController extends Controller
             DB::rollBack();
             return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
         }
+    }
+
+    public function processingOrder(Order $order)
+    {
+        if ($order->dispatched !== 'created') {
+            return response()->json([
+                'success' => false,
+                'message' => 'O estado do pedido não permite alteração.'
+            ], 400);
+        }
+
+        $order->dispatched = 'processing';
+        $order->save();
+        return response()->json($order, 200);
     }
 
     /**
