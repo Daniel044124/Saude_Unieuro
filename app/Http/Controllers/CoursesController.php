@@ -108,9 +108,4 @@ class CoursesController extends Controller
             $this->error($e);
         }
     }
-
-    private function error(\Exception $e)
-    {
-        return response()->json(['error' => $e->getMessage()], 400);
-    }
 }

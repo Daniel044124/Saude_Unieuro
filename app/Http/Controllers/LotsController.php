@@ -132,8 +132,4 @@ class LotsController extends Controller
             return $this->error($e);
         }
     }
-
-    private function error(\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 400);
-    }
 }
