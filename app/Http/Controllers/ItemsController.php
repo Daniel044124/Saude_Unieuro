@@ -82,7 +82,7 @@ class ItemsController extends Controller
         $lot->description = $request->input('lot.description');
         $lot->expiration = $request->input('lot.expiration');
         $lot->qtd = $request->input('lot.qtd');
-        $lot->open = $request->input('lot.open');
+        $lot->open = false;
 
         $item->save();
         $item->lots()->save($lot);

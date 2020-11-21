@@ -6,6 +6,7 @@ use App\Course;
 use App\Item;
 use App\Lab;
 use App\Order;
+use App\Subject;
 use App\User;
 use App\Lot;
 use DateTime;
@@ -60,7 +61,8 @@ class OrdersController extends Controller
                 'items.*.id' => ['required'],
                 'items.*.qtd' => ['required'],
                 'lab_id' => ['required'],
-                'course_id' => ['required']
+                'course_id' => ['required'],
+                'subject_id' => ['required'],
             ]);
 
             if ($validator->fails()) {
@@ -74,7 +76,7 @@ class OrdersController extends Controller
                 ['lab_id', $request->input('lab_id')],
                 ['due_date', new DateTime($request->input('due_date'))],
                 ['due_time', $request->input('due_time')]
-            ]);
+            ])->get();
 
             if ($checkAvailability->count() > 0) {
                 return response()->json(['error' => 'Laboratório não disponível nesta data e horário.'], 400);
@@ -86,9 +88,11 @@ class OrdersController extends Controller
 
             $course = Course::find($request->input('course_id'));
             $lab = Lab::find($request->input('lab_id'));
+            $subject = Subject::find($request->input('subject_id'));
 
             $order->course()->associate($course);
             $order->lab()->associate($lab);
+            $order->subject()->associate($subject);
 
             $user = User::find($request->input('user_id'));
 
@@ -113,10 +117,7 @@ class OrdersController extends Controller
             }
             return response()->json($order, 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->getMessage()
-            ], 400);
+            return $this->error($e);
         }
     }
 
@@ -128,7 +129,7 @@ class OrdersController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['items', 'lab', 'course', 'user'])->find($id);
+        $order = Order::with(['items', 'lab', 'course', 'subject.classroom', 'user'])->find($id);
         return response()->json($order, 200);
     }
 

@@ -14,4 +14,9 @@ class Subject extends Model
     {
         return $this->belongsTo('App\Classroom', 'class_id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany('App\Order');
+    }
 }

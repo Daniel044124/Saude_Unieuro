@@ -29,4 +29,9 @@ class Order extends Model
         return $this->belongsToMany('App\Item', 'items_orders')
             ->withPivot('qtd');
     }
+
+    public function subject()
+    {
+        return $this->belongsTo('App\Subject');
+    }
 }

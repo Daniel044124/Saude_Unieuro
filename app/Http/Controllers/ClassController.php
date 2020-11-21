@@ -51,6 +51,11 @@ class ClassController extends Controller
         return response()->json($classroom, 200);
     }
 
+    public function getClassesByCourse(Course $course)
+    {
+        return $course->classes;
+    }
+
     /**
      * Update the specified resource in storage.
      *

@@ -18,9 +18,9 @@ class CreateItemsTable extends Migration
             $table->string('name');
             $table->string('brand')->nullable();
             $table->string('unit', 5);
-            $table->string('formula');
-            $table->string('molecular_weight');
-            $table->string('concentration');
+            $table->string('formula')->nullable();
+            $table->string('molecular_weight')->nullable();
+            $table->string('concentration')->nullable();
             $table->timestamps();
         });
     }

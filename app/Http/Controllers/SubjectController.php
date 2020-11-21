@@ -47,6 +47,11 @@ class SubjectController extends Controller
         return response()->json($subject, 200);
     }
 
+    public function getSubjectsByClass(Classroom $classroom)
+    {
+        return $classroom->subjects;
+    }
+
     /**
      * Update the specified resource in storage.
      *
