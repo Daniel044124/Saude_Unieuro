@@ -36,6 +36,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'lots' => 'LotsController',
         'labs' => 'LabsController',
         'courses' => 'CoursesController',
+        'subjects' => 'SubjectController',
     ]);
     Route::apiResource('classes', 'ClassController')->parameters([
         'classes' => 'classroom'

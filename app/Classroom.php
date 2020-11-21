@@ -15,4 +15,9 @@ class Classroom extends Model
     {
         return $this->belongsTo('App\Course', 'course_id');
     }
+
+    public function subjects()
+    {
+        return $this->hasMany('App\Subject', 'class_id');
+    }
 }

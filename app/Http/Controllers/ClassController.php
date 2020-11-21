@@ -12,14 +12,14 @@ class ClassController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Http\JsonResponse
      */
     public function index()
     {
         try {
             return Classroom::with('course')->get();
         } catch (\Exception $exception) {
-            $this->error($exception);
+            return $this->error($exception);
         }
     }
 
@@ -44,7 +44,7 @@ class ClassController extends Controller
      * Display the specified resource.
      *
      * @param Classroom $classroom
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Classroom $classroom)
     {
@@ -80,7 +80,7 @@ class ClassController extends Controller
             print $classroom->delete();
             return response()->json([], 200);
         } catch (\Exception $exception) {
-            $this->error($exception);
+            return $this->error($exception);
         }
     }
 }
