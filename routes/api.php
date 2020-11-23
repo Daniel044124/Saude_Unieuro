@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/roles/{id}/menus', 'RolesController@setMenusByRole');
     Route::get('/courses/{course}/classes', 'ClassController@getClassesByCourse');
     Route::get('/classes/{classroom}/subjects', 'SubjectController@getSubjectsByClass');
+    Route::post('/reports/items/classroom', 'ReportController@itemsByClassrooms');
     Route::apiResources([
         'roles' => 'RolesController',
         'items' => 'ItemsController',
